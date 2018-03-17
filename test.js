@@ -3,7 +3,7 @@ const fs = require('fs')
 const cheerio = require('cheerio')
 const FormData = require('form-data')
 
-let site =  `http://konachan.net/post/show/261382`
+let site =  `http://xxxx.net`
 
 
 async function DownImg() {
