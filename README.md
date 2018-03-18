@@ -15,3 +15,4 @@ node app.js
 node test.js
 ``` 
 > to test different environments
+> use `npm install` to pack dependency

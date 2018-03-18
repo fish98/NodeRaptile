@@ -3,23 +3,26 @@ const fs = require('fs')
 const cheerio = require('cheerio')
 const FormData = require('form-data')
 const http = require('http')
-const conf = require('./config')
+const config = require('./config')
 
-let imgnum = 0
-let start = conf.start
-let end = (conf.end - conf.start - 1)
-let conpage = conf.conpage
+/* Global Config */
+
 let allClass = []
+let sites
 
-// const form = new FormData() fs.readFileSync('webRequest', {   encoding:
-// 'utf8' }).split('\n').forEach(item => {   const [a, b] = item.split(':')   if
-// (!b)     form.append(a, b)   })  console.log(form)
+/* Load config from config.js */
+
+const list = config.list
+const conpage = config.conpage
+let start = config.start 
+
+/* Start working */
 
 async function sendRequest() {
   console.log("Start getting pics pages")
   let Promises = []
-  for (let page = start; page <= (start + conpage); page++) {
-    site = `http://konachan.net/post?page=${page}&tags=loli`
+  for (let page = start; page <= (start+conpage); page++) {
+    site = `http://xxxx.net/post?page=${page}`
     Promises.push(fetch(site, {method: "POST"}).then(res => res.text()).then(body => {
       let $ = cheerio.load(body)
       $("li > div > a").each((index, ele) => {
@@ -29,7 +32,7 @@ async function sendRequest() {
       console.log(err)
     }))
 
-    if (page % conf.c === 0) {
+    if (page % list === 0) {
       await Promise.all(Promises)
       Promises = []
     }
@@ -61,11 +64,11 @@ async function getOrigin() {
         return y
       })(allClass[i]))
 
-      if (i % conf.c === 0) {
+      if (i % list === 0) {
         result = result.concat(await Promise.all(promises))
         promises = []
       }
-      
+
     } catch (err) {
       console.log(err)
     }
@@ -75,21 +78,19 @@ async function getOrigin() {
 }
 
 async function getImg(){
-  console.log("Start downloading imgs")
   allClass = await getOrigin()
   allClass = allClass.map(item => "http:".concat(item))
   let promises = []
-  for ( i = 0; i < allClass.length; i++) {
+  for (let i = 0; i < allClass.length; i++) {
     let p = new Promise((resolve, reject) => {
       const item = allClass[i]
-      const stream = fs.createWriteStream(`img/${imgnum}.jpg`)
+      const stream = fs.createWriteStream(`img/${i}.jpg`)
       try {
         http.get(item, res => {
           res.pipe(stream)
         })
         stream.on('finish', () => {
-          console.log(`Write ${imgnum}.jpg OK`)
-          imgnum++
+          console.log(`Write ${i}.jpg OK`)
           resolve()
         })
       } catch (err) {
@@ -98,21 +99,17 @@ async function getImg(){
     })
     promises.push(p)
 
-    if (i % conf.c === 0) {
+    if (i % list === 0) {
       await Promise.all(promises)
       promises = []
     }
   }
   console.log(" Happy Reptile &&  Happy TTfish")
-  start += conpage;
 }
 
 async function fish() {
-  for(p = 1; p <= (end / conpage + 1); p++){
-  let sites
   await getUrl()
   await getImg()
-  }
 }
 
 fish()
