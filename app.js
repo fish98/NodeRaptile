@@ -7,6 +7,7 @@ const conf = require('./config')
 
 let allClass = []
 let sites
+let imgnum = 0
 
 let start = conf.start
 let end = conf.end
@@ -76,19 +77,21 @@ async function getOrigin() {
 }
 
 async function getImg(){
+  console.log("Start downloading imgs")
   allClass = await getOrigin()
   allClass = allClass.map(item => "http:".concat(item))
   let promises = []
-  for (let i = 0; i < allClass.length; i++) {
+  for ( i = 0; i < allClass.length; i++) {
     let p = new Promise((resolve, reject) => {
       const item = allClass[i]
-      const stream = fs.createWriteStream(`img/${i}.jpg`)
+      const stream = fs.createWriteStream(`img/${imgnum}.jpg`)
       try {
         http.get(item, res => {
           res.pipe(stream)
         })
         stream.on('finish', () => {
-          console.log(`Write ${i}.jpg OK`)
+          console.log(`Write ${imgnum}.jpg OK`)
+          imgnum++
           resolve()
         })
       } catch (err) {
