@@ -5,13 +5,11 @@ const FormData = require('form-data')
 const http = require('http')
 const conf = require('./config')
 
-let allClass = []
-let sites
 let imgnum = 0
-
 let start = conf.start
-let end = conf.end
+let end = (conf.end - conf.start - 1)
 let conpage = conf.conpage
+let allClass = []
 
 // const form = new FormData() fs.readFileSync('webRequest', {   encoding:
 // 'utf8' }).split('\n').forEach(item => {   const [a, b] = item.split(':')   if
@@ -21,7 +19,7 @@ async function sendRequest() {
   console.log("Start getting pics pages")
   let Promises = []
   for (let page = start; page <= (start + conpage); page++) {
-    site = `http://xxxxx.net/post?page=${page}`
+    site = `http://konachan.net/post?page=${page}&tags=loli`
     Promises.push(fetch(site, {method: "POST"}).then(res => res.text()).then(body => {
       let $ = cheerio.load(body)
       $("li > div > a").each((index, ele) => {
@@ -106,11 +104,15 @@ async function getImg(){
     }
   }
   console.log(" Happy Reptile &&  Happy TTfish")
+  start += conpage;
 }
 
 async function fish() {
+  for(p = 1; p <= (end / conpage + 1); p++){
+  let sites
   await getUrl()
   await getImg()
+  }
 }
 
 fish()
